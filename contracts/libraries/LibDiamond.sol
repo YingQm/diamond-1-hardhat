@@ -7,19 +7,18 @@ pragma solidity ^0.8.0;
 /******************************************************************************/
 import { IDiamondCut } from "../interfaces/IDiamondCut.sol";
 
-// Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
-// The loupe functions are required by the EIP2535 Diamonds standard
-
 library LibDiamond {
-    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
+    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage"); // ????
 
     struct FacetAddressAndSelectorPosition {
         address facetAddress;
         uint16 selectorPosition;
     }
 
+    // 每个钻石合约及其各个钻石面合约共享的全局变量
     struct DiamondStorage {
         // function selector => facet address and selector position in selectors array
+        // 函数选择子到其所属的钻石面的地址及其在函数选择子数组中的位置
         mapping(bytes4 => FacetAddressAndSelectorPosition) facetAddressAndSelectorPosition;
         bytes4[] selectors;
         mapping(bytes4 => bool) supportedInterfaces;

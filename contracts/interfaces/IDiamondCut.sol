@@ -11,9 +11,9 @@ interface IDiamondCut {
     // Add=0, Replace=1, Remove=2
 
     struct FacetCut {
-        address facetAddress;
-        FacetCutAction action;
-        bytes4[] functionSelectors;
+        address facetAddress; // 当前钻石面（Facet）的地址
+        FacetCutAction action; // 当前DiamondCut的操作，增删改查
+        bytes4[] functionSelectors; // 该钻石面（Facet）所支持的函数选择子的集合
     }
 
     /// @notice Add/replace/remove any number of functions and optionally execute

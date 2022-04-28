@@ -5,12 +5,9 @@ pragma solidity ^0.8.0;
 * EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
 /******************************************************************************/
 
-// The functions in DiamondLoupeFacet MUST be added to a diamond.
-// The EIP-2535 Diamond standard requires these functions.
-
-import { LibDiamond } from  "../libraries/LibDiamond.sol";
-import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
-import { IERC165 } from "../interfaces/IERC165.sol";
+import { LibDiamond } from  "./libraries/LibDiamond.sol";
+import { IDiamondLoupe } from "./interfaces/IDiamondLoupe.sol";
+import { IERC165 } from "./interfaces/IERC165.sol";
 
 contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
     // Diamond Loupe Functions
@@ -141,7 +138,7 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
         facetAddress_ = ds.facetAddressAndSelectorPosition[_functionSelector].facetAddress;
     }
 
-    // This implements ERC-165.
+    // This implements ERC-165. DiamondInit 初始化 设置为true
     function supportsInterface(bytes4 _interfaceId) external override view returns (bool) {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         return ds.supportedInterfaces[_interfaceId];

@@ -75,7 +75,7 @@ The `test/diamondTest.js` file gives tests for the `diamondCut` function and the
 
 This diamond implementation is boilerplate code that makes a diamond compliant with EIP-2535 Diamonds.
 
-Specifically you can copy and use the [DiamondCutFacet.sol](./contracts/facets/DiamondCutFacet.sol) and [DiamondLoupeFacet.sol](./contracts/facets/DiamondLoupeFacet.sol) contracts. They implement the `diamondCut` function and the loupe functions.
+Specifically you can copy and use the [DiamondCutFacet.sol](contracts/DiamondCutFacet.sol) and [DiamondLoupeFacet.sol](contracts/DiamondLoupeFacet.sol) contracts. They implement the `diamondCut` function and the loupe functions.
 
 The [Diamond.sol](./contracts/Diamond.sol) contract could be used as is, or it could be used as a starting point and customized. This contract is the diamond. Its deployment creates a diamond. It's address is a stable diamond address that does not change.
 
@@ -128,5 +128,11 @@ Contact:
 MIT license. See the license file.
 Anyone can use or modify this software for their purposes.
 
-
-
+## go build
+```shell
+abigen --sol DiamondCutFacet.sol --pkg generated --out ./generated/DiamondCutFacet.go
+abigen --sol Diamond.sol --pkg generated --out ./generated/Diamond.go
+abigen --sol DiamondInit.sol --pkg generated --out ./generated/DiamondInit.go
+abigen --sol DiamondLoupeFacet.sol --pkg generated --out ./generated/DiamondLoupeFacet.go
+abigen --sol OwnershipFacet.sol --pkg generated --out ./generated/OwnershipFacet.go
+```
