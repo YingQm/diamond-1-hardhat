@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"crypto/ecdsa"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"github.com/YingQm/diamond-1-hardhat/contracts/generated"
@@ -212,32 +213,12 @@ func Test_DeployContracts(t *testing.T) {
 
 	diamondLoupeFacet, deployDiamondLoupeFacetResult, err := DeployDiamondLoupeFacet(sim, para.DeployPrivateKey, para.Deployer)
 	fmt.Println(diamondLoupeFacet, deployDiamondLoupeFacetResult, err)
-
-	//_diamondCut=append(_diamondCut, generated.IDiamondCutFacetCut{FacetAddress:deployDiamondLoupeFacetResult.Address, Action:0,FunctionSelectors:nil})
+	_diamondCut = append(_diamondCut, generated.IDiamondCutFacetCut{FacetAddress: deployDiamondLoupeFacetResult.Address, Action: 0, FunctionSelectors: GetSelectors(generated.DiamondLoupeFacetMetaData.Sigs)})
 
 	ownershipFacet, deployOwnershipFacetResult, err := DeployOwnershipFacet(sim, para.DeployPrivateKey, para.Deployer)
 	fmt.Println(ownershipFacet, deployOwnershipFacetResult, err)
+	_diamondCut = append(_diamondCut, generated.IDiamondCutFacetCut{FacetAddress: deployDiamondLoupeFacetResult.Address, Action: 0, FunctionSelectors: GetSelectors(generated.OwnershipFacetMetaData.Sigs)})
 
-	//cut.push({
-	//facetAddress: facet.address,
-	//	action: FacetCutAction.Add,
-	//		functionSelectors: getSelectors(facet)
-	//})
-
-	//{// get function selectors from ABI
-	//	function getSelectors (contract) {
-	//	const signatures = Object.keys(contract.interface.functions)
-	//	const selectors = signatures.reduce((acc, val) => {
-	//	if (val !== 'init(bytes)') {
-	//	acc.push(contract.interface.getSighash(val))
-	//	}
-	//	return acc
-	//	}, [])
-	//selectors.contract = contract
-	//selectors.remove = remove
-	//selectors.get = get
-	//	return selectors
-	//}}
 	parsed, err := generated.DiamondInitMetaData.GetAbi()
 	if nil != err {
 		require.Nil(t, err)
@@ -255,7 +236,7 @@ func Test_DeployContracts(t *testing.T) {
 		From:    deployDiamondResult.Address,
 		Context: context.Background(),
 	}
-	//  DiamondCut(opts *bind.TransactOpts, _diamondCut []IDiamondCutFacetCut, _init common.Address, _calldata []byte)
+
 	tx, err := diamondCut.DiamondCut(opts, _diamondCut, deployDiamondInitResult.Address, functionCall)
 	if nil != err {
 		require.Nil(t, err)
@@ -266,23 +247,32 @@ func Test_DeployContracts(t *testing.T) {
 
 }
 
-//func GetSelectors(metaData *bind.MetaData) [][4]byte {
-//	var functionSelectors [][4]byte
-//
-//	parsed, err := metaData.GetAbi()
-//	if nil != err {
-//		fmt.Println("getabi err:",err)
-//		return functionSelectors
-//		//require.Nil(t, err)
-//	}
-//
-//	for k, v := range metaData.Sigs {
-//		fmt.Println(k, v)
-//		method, exist := parsed.Methods[v]
-//		if exist {
-//			functionSelectors = append(functionSelectors, [4]byte(method.ID))
-//		}
-//	}
-//
-//return functionSelectors
-//}
+//checksum: first four bytes of double-SHA256.
+func checksum(input []byte) (cksum [4]byte) {
+	h := sha256.New()
+	_, err := h.Write(input)
+	if err != nil {
+		return
+	}
+	intermediateHash := h.Sum(nil)
+	h.Reset()
+	_, err = h.Write(intermediateHash)
+	if err != nil {
+		return
+	}
+	finalHash := h.Sum(nil)
+	copy(cksum[:], finalHash[:])
+	return
+}
+
+func GetSelectors(sigs map[string]string) [][4]byte {
+	var functionSelectors [][4]byte
+
+	for k, v := range sigs {
+		fmt.Println(k, v)
+		data := checksum([]byte(k))
+		functionSelectors = append(functionSelectors, data)
+	}
+
+	return functionSelectors
+}
