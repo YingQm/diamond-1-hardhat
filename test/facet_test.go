@@ -12,13 +12,14 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
 )
 
 var (
 	//txslog = log15.New("ethereum relayer", "ethtxs")
-	GasLimit4Deploy  = uint64(0)
+	GasLimit4Deploy = uint64(0)
 )
 
 type DeployPara struct {
@@ -29,7 +30,7 @@ type DeployPara struct {
 
 type DeployResult struct {
 	Address common.Address
-	TxHash string
+	TxHash  string
 }
 
 //PrepareTestEnv ...
@@ -94,7 +95,7 @@ func PrepareAuth(client ethinterface.EthClientSpec, privateKey *ecdsa.PrivateKey
 	if nil != err {
 		return nil, err
 	}
-	auth.Nonce=big.NewInt(int64(nonce))
+	auth.Nonce = big.NewInt(int64(nonce))
 
 	return auth, nil
 }
@@ -119,6 +120,44 @@ func DeployDiamondCutFacet(client ethinterface.EthClientSpec, privateKey *ecdsa.
 	return diamondCutFacet, deployResult, nil
 }
 
+func DeployDiamond(client ethinterface.EthClientSpec, privateKey *ecdsa.PrivateKey, deployer common.Address, diamondCutFacet common.Address) (*generated.Diamond, *DeployResult, error) {
+	auth, err := PrepareAuth(client, privateKey, deployer)
+	if nil != err {
+		return nil, nil, err
+	}
+
+	addr, tx, diamond, err := generated.DeployDiamond(auth, client, deployer, diamondCutFacet)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	deployResult := &DeployResult{
+		Address: addr,
+		TxHash:  tx.Hash().String(),
+	}
+
+	return diamond, deployResult, nil
+}
+
+func DeployDiamondInit(client ethinterface.EthClientSpec, privateKey *ecdsa.PrivateKey, deployer common.Address) (*generated.DiamondInit, *DeployResult, error) {
+	auth, err := PrepareAuth(client, privateKey, deployer)
+	if nil != err {
+		return nil, nil, err
+	}
+
+	addr, tx, diamondInit, err := generated.DeployDiamondInit(auth, client)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	deployResult := &DeployResult{
+		Address: addr,
+		TxHash:  tx.Hash().String(),
+	}
+
+	return diamondInit, deployResult, nil
+}
+
 func DeployDiamondLoupeFacet(client ethinterface.EthClientSpec, privateKey *ecdsa.PrivateKey, deployer common.Address) (*generated.DiamondLoupeFacet, *DeployResult, error) {
 	auth, err := PrepareAuth(client, privateKey, deployer)
 	if nil != err {
@@ -138,70 +177,112 @@ func DeployDiamondLoupeFacet(client ethinterface.EthClientSpec, privateKey *ecds
 	return diamondLoupeFacet, deployResult, nil
 }
 
-//// DeployDiamond
-//func DeployDiamond(client ethinterface.EthClientSpec, privateKey *ecdsa.PrivateKey, deployer common.Address, operator common.Address, initValidators []common.Address, initPowers []*big.Int) (*generated.Valset, *ethtxs.DeployResult, error) {
-//	auth, err := PrepareAuth(client, privateKey, deployer)
-//	if nil != err {
-//		return nil, nil, err
-//	}
-//
-//	//部署合约
-//	//func DeployDiamond(auth *bind.TransactOpts, backend bind.ContractBackend, _diamondCut []IDiamondCutFacetCut, _args DiamondDiamondArgs) (common.Address, *types.Transaction, *Diamond, error) {
-//
-//		addr, tx, valset, err :=generated.DeployDiamond(auth, client) //generated.DeployValset(auth, client, operator, initValidators, initPowers)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	deployResult := &DeployResult{
-//		Address: addr,
-//		TxHash:  tx.Hash().String(),
-//	}
-//
-//	return valset, deployResult, nil
-//}
+func DeployOwnershipFacet(client ethinterface.EthClientSpec, privateKey *ecdsa.PrivateKey, deployer common.Address) (*generated.OwnershipFacet, *DeployResult, error) {
+	auth, err := PrepareAuth(client, privateKey, deployer)
+	if nil != err {
+		return nil, nil, err
+	}
 
-func Test_DeployContracts(t *testing.T){
-	//ctx := context.Background()
-	sim, para := PrepareTestEnv()
+	addr, tx, ownershipFacet, err := generated.DeployOwnershipFacet(auth, client)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	//sim, isSim := client.(*ethinterface.SimExtend)
-	//if isSim {
-	//	fmt.Println("Use the simulator")
-	//} else {
-	//	fmt.Println("Use the actual Ethereum")
-	//}
-	//
-	//x2EthContracts.Valset, deployInfo.Valset, err = DeployValset(client, para.DeployPrivateKey, para.Deployer, para.Operator, para.InitValidators, para.InitPowers)
+	deployResult := &DeployResult{
+		Address: addr,
+		TxHash:  tx.Hash().String(),
+	}
 
-
-	diamondCutFacet, deployResult,err:=DeployDiamondCutFacet(sim,para.DeployPrivateKey, para.Deployer)
-	fmt.Println(diamondCutFacet, deployResult,err)
-
-	diamondLoupeFacet, deployResult,err:=DeployDiamondLoupeFacet(sim,para.DeployPrivateKey, para.Deployer)
-	fmt.Println(diamondLoupeFacet, deployResult,err)
-
-	//opts, _ := bind.NewKeyedTransactorWithChainID(para.DeployPrivateKey, big.NewInt(1337))
-	//parsed, _ := abi.JSON(strings.NewReader(generated.DiamondMetaData.Bin))
-	//contractAddr, _, _, _ := bind.DeployContract(opts, parsed, common.FromHex(generated.DiamondMetaData.Bin), sim)
-	//sim.Commit()
-	//
-	//callMsg := ethereum.CallMsg{
-	//	From: para.Deployer,
-	//	To:   &contractAddr,
-	//	Data: common.FromHex(generated.DiamondMetaData.Bin),
-	//}
-	//
-	//_, err := sim.EstimateGas(ctx, callMsg)
-	//if nil != err {
-	//	panic("failed to estimate gas due to:" + err.Error())
-	//}
-	//x2EthContracts, x2EthDeployInfo, err := DeployAndInit(sim, para)
-	//if nil != err {
-	//	return nil, nil, nil, nil, err
-	//}
-	//sim.Commit()
-	//
-	//return para, sim, x2EthContracts, x2EthDeployInfo, nil
+	return ownershipFacet, deployResult, nil
 }
 
+func Test_DeployContracts(t *testing.T) {
+	//ctx := context.Background()
+	sim, para := PrepareTestEnv()
+	diamondCutFacet, deployDiamondCutFacetResult, err := DeployDiamondCutFacet(sim, para.DeployPrivateKey, para.Deployer)
+	fmt.Println(diamondCutFacet, deployDiamondCutFacetResult, err)
+
+	diamond, deployDiamondResult, err := DeployDiamond(sim, para.DeployPrivateKey, para.Deployer, deployDiamondCutFacetResult.Address)
+	fmt.Println(diamond, deployDiamondResult, err)
+
+	diamondInit, deployDiamondInitResult, err := DeployDiamondInit(sim, para.DeployPrivateKey, para.Deployer)
+	fmt.Println(diamondInit, deployDiamondInitResult, err)
+
+	var _diamondCut []generated.IDiamondCutFacetCut
+
+	diamondLoupeFacet, deployDiamondLoupeFacetResult, err := DeployDiamondLoupeFacet(sim, para.DeployPrivateKey, para.Deployer)
+	fmt.Println(diamondLoupeFacet, deployDiamondLoupeFacetResult, err)
+
+	//_diamondCut=append(_diamondCut, generated.IDiamondCutFacetCut{FacetAddress:deployDiamondLoupeFacetResult.Address, Action:0,FunctionSelectors:nil})
+
+	ownershipFacet, deployOwnershipFacetResult, err := DeployOwnershipFacet(sim, para.DeployPrivateKey, para.Deployer)
+	fmt.Println(ownershipFacet, deployOwnershipFacetResult, err)
+
+	//cut.push({
+	//facetAddress: facet.address,
+	//	action: FacetCutAction.Add,
+	//		functionSelectors: getSelectors(facet)
+	//})
+
+	//{// get function selectors from ABI
+	//	function getSelectors (contract) {
+	//	const signatures = Object.keys(contract.interface.functions)
+	//	const selectors = signatures.reduce((acc, val) => {
+	//	if (val !== 'init(bytes)') {
+	//	acc.push(contract.interface.getSighash(val))
+	//	}
+	//	return acc
+	//	}, [])
+	//selectors.contract = contract
+	//selectors.remove = remove
+	//selectors.get = get
+	//	return selectors
+	//}}
+	parsed, err := generated.DiamondInitMetaData.GetAbi()
+	if nil != err {
+		require.Nil(t, err)
+	}
+	functionCall, err := parsed.Pack("init")
+	if nil != err {
+		require.Nil(t, err)
+	}
+
+	diamondCut, err := generated.NewIDiamondCut(deployDiamondResult.Address, sim)
+	if nil != err {
+		require.Nil(t, err)
+	}
+	opts := &bind.TransactOpts{
+		From:    deployDiamondResult.Address,
+		Context: context.Background(),
+	}
+	//  DiamondCut(opts *bind.TransactOpts, _diamondCut []IDiamondCutFacetCut, _init common.Address, _calldata []byte)
+	tx, err := diamondCut.DiamondCut(opts, _diamondCut, deployDiamondInitResult.Address, functionCall)
+	if nil != err {
+		require.Nil(t, err)
+	}
+	sim.Commit()
+
+	fmt.Println(tx)
+
+}
+
+//func GetSelectors(metaData *bind.MetaData) [][4]byte {
+//	var functionSelectors [][4]byte
+//
+//	parsed, err := metaData.GetAbi()
+//	if nil != err {
+//		fmt.Println("getabi err:",err)
+//		return functionSelectors
+//		//require.Nil(t, err)
+//	}
+//
+//	for k, v := range metaData.Sigs {
+//		fmt.Println(k, v)
+//		method, exist := parsed.Methods[v]
+//		if exist {
+//			functionSelectors = append(functionSelectors, [4]byte(method.ID))
+//		}
+//	}
+//
+//return functionSelectors
+//}
