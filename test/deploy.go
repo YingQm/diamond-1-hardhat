@@ -20,6 +20,7 @@ import (
 var (
 	//txslog = log15.New("ethereum relayer", "ethtxs")
 	GasLimit4Deploy = uint64(0)
+	nullAddress = "0x0000000000000000000000000000000000000000"
 )
 
 type DeployPara struct {
@@ -216,11 +217,13 @@ func checksum(input []byte) (cksum [4]byte) {
 
 func GetSelectors(sigs map[string]string) [][4]byte {
 	var functionSelectors [][4]byte
-	for k, v := range sigs {
-		fmt.Println(k, v)
+	for k, _ := range sigs {
 		data := checksum([]byte(k))
 		functionSelectors = append(functionSelectors, data)
 	}
+
+	fmt.Println("abi sigs:", sigs)
+	fmt.Println("functionSelectors:", functionSelectors)
 
 	return functionSelectors
 }
@@ -236,3 +239,38 @@ func TrimZeroAndDot(s string) string {
 
 	return s
 }
+
+
+
+//{
+//	auth, err := PrepareAuth(sim, para.DeployPrivateKey, para.Deployer)
+//	if nil != err {
+//		require.Nil(t, err)
+//	}
+//
+//	gasLimit := uint64(21100)
+//
+//	amount := big.NewInt(1)
+//	amount, _ = amount.SetString(TrimZeroAndDot("1000000"), 10)
+//
+//	tx := types.NewTx(&types.LegacyTx{
+//		Nonce:    uint64(auth.Nonce.Int64()),
+//		To:       &deployDiamondResult.Address,
+//		Value:    amount,
+//		Gas:      gasLimit, //auth.GasLimit,
+//		GasPrice: auth.GasPrice,
+//		//Data:     data,
+//	})
+//
+//	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(1337)), para.DeployPrivateKey)
+//	if err != nil {
+//		require.Nil(t, err)
+//	}
+//
+//	err = sim.SendTransaction(context.Background(), signedTx)
+//	if err != nil {
+//		require.Nil(t, err)
+//	}
+//
+//	sim.Commit()
+//}
