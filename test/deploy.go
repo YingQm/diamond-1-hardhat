@@ -20,7 +20,7 @@ import (
 var (
 	//txslog = log15.New("ethereum relayer", "ethtxs")
 	GasLimit4Deploy = uint64(0)
-	nullAddress = "0x0000000000000000000000000000000000000000"
+	nullAddress     = "0x0000000000000000000000000000000000000000"
 )
 
 type DeployPara struct {
@@ -72,18 +72,18 @@ func PrepareAuth(client ethinterface.EthClientSpec, privateKey *ecdsa.PrivateKey
 		return nil, errors.New("failed to get suggest gas price " + err.Error())
 	}
 
-	chainID, err := client.NetworkID(ctx)
-	if err != nil {
-		//txslog.Error("PrepareAuth NetworkID", "err", err)
-		return nil, err
-	}
+	//chainID, err := client.NetworkID(ctx)
+	//if err != nil {
+	//	//txslog.Error("PrepareAuth NetworkID", "err", err)
+	//	return nil, err
+	//}
+	//
+	//_, isSim := client.(*ethinterface.SimExtend)
+	//if isSim {
+	//	chainID = big.NewInt(1337)
+	//}
 
-	_, isSim := client.(*ethinterface.SimExtend)
-	if isSim {
-		chainID = big.NewInt(1337)
-	}
-
-	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
+	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1337))
 	if err != nil {
 		//txslog.Error("PrepareAuth NewKeyedTransactorWithChainID", "err", err, "chainID", chainID)
 		return nil, err
@@ -239,8 +239,6 @@ func TrimZeroAndDot(s string) string {
 
 	return s
 }
-
-
 
 //{
 //	auth, err := PrepareAuth(sim, para.DeployPrivateKey, para.Deployer)

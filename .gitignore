@@ -6,3 +6,5 @@ artifacts
 .env
 .idea/
 .idea/*
+vendor
+vendor/*

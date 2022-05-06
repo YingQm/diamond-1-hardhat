@@ -2,7 +2,7 @@ module github.com/YingQm/diamond-1-hardhat
 
 go 1.18
 
-replace github.com/YingQm/diamond-1-hardhat => ./
+//replace github.com/YingQm/diamond-1-hardhat => ./
 
 require (
 	github.com/ethereum/go-ethereum v1.10.16

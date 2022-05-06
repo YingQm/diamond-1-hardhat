@@ -79,7 +79,7 @@ Specifically you can copy and use the [DiamondCutFacet.sol](contracts/DiamondCut
 
 The [Diamond.sol](./contracts/Diamond.sol) contract could be used as is, or it could be used as a starting point and customized. This contract is the diamond. Its deployment creates a diamond. It's address is a stable diamond address that does not change.
 
-The [LibDiamond.sol](./contracts/libraries/LibDiamond.sol) library could be used as is. It shows how to implement Diamond Storage. This contract includes contract ownership which you might want to change if you want to implement DAO-based ownership or other form of contract ownership. Go for it. Diamonds can work with any kind of contract ownership strategy. This library contains an internal function version of `diamondCut` that can be used in the constructor of a diamond or other places.
+The [LibDiamond.sol](contracts/LibDiamond.sol) library could be used as is. It shows how to implement Diamond Storage. This contract includes contract ownership which you might want to change if you want to implement DAO-based ownership or other form of contract ownership. Go for it. Diamonds can work with any kind of contract ownership strategy. This library contains an internal function version of `diamondCut` that can be used in the constructor of a diamond or other places.
 
 ## Calling Diamond Functions
 
@@ -135,4 +135,8 @@ abigen --sol Diamond.sol --pkg generated --out ./generated/Diamond.go
 abigen --sol DiamondInit.sol --pkg generated --out ./generated/DiamondInit.go
 abigen --sol DiamondLoupeFacet.sol --pkg generated --out ./generated/DiamondLoupeFacet.go
 abigen --sol OwnershipFacet.sol --pkg generated --out ./generated/OwnershipFacet.go
+abigen --sol LibDiamond.sol --pkg generated --out ./generated/LibDiamond.go
+
+abigen --sol Test1Facet.sol --pkg testFacet --out ./Test1Facet.go
+abigen --sol Test2Facet.sol --pkg testFacet --out ./Test2Facet.go
 ```
